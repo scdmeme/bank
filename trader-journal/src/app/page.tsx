@@ -9,15 +9,16 @@ export default async function Home() {
   return (
     <main className="flex-1 flex items-center justify-center px-6">
       <div className="max-w-xl text-center">
-        <p className="text-sm uppercase tracking-widest text-emerald-400 mb-4">
-          MVP · AI trading journal
+        <p className="text-sm uppercase tracking-widest text-fuchsia-400 mb-4">
+          AI-журнал для тренчеров
         </p>
         <h1 className="text-4xl sm:text-5xl font-semibold leading-tight">
-          Веди журнал сделок голосом и текстом
+          Веди журнал мемкоин-флипов голосом и текстом
         </h1>
         <p className="mt-5 text-neutral-400 text-lg">
-          Опиши сделку свободным текстом — AI сам вытащит инструмент, тезис,
-          эмоцию входа, результат и ошибку. Никаких таблиц вручную.
+          Опиши флип как есть — AI сам вытащит токен, маркеткап входа/выхода,
+          нарратив, источник, результат и ошибку (paper hands, FOMO-топ,
+          held-rug). И покажет твои паттерны в Trench Map.
         </p>
         <div className="mt-8 flex items-center justify-center gap-3">
           <Link

@@ -75,11 +75,11 @@ export function TradeForm() {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
       <label className="block text-sm font-medium text-neutral-300">
-        Расскажи о сделке
+        Расскажи о флипе
       </label>
       <p className="mt-1 text-xs text-neutral-500">
-        Например: «Зашёл в лонг по BTC на пробое, думал продолжится тренд, но
-        запаниковал и закрыл рано в небольшой плюс».
+        Например: «Заснайпил $WIF на пампфане с тележки на 30к МК, заапил 2 сола,
+        сделал 5х но зажадничал и не зафиксил — прокатал почти в ноль».
       </p>
       <textarea
         value={rawText}
