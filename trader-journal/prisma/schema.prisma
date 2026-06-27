@@ -1,0 +1,43 @@
+// Prisma schema for Trader Journal MVP.
+// SQLite for local/prototype; switch `provider` to "postgresql" for production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  trades       Trade[]
+}
+
+model Trade {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Raw input as dictated/typed by the trader.
+  rawText   String
+
+  // AI-extracted structured fields.
+  instrument String?
+  direction  String?  // long | short
+  thesis     String?
+  emotion    String?  // entry emotion
+  outcome    String?  // win | loss | breakeven | open
+  mistake    String?
+  // 1..5 discipline / process quality score inferred by AI.
+  score      Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
