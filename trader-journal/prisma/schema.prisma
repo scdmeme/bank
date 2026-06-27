@@ -1,0 +1,101 @@
+// Prisma schema for Trencher Journal.
+// DB: PostgreSQL (Supabase). For Supabase use the pooled connection string in
+// DATABASE_URL (port 6543, pgbouncer=true) and the direct one in DIRECT_URL
+// (port 5432) so migrations work.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Plan {
+  free
+  pro
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  // Subscription state.
+  plan     Plan      @default(free)
+  proUntil DateTime?
+
+  trades   Trade[]
+  payments Payment[]
+}
+
+// A single memecoin flip / trench play.
+model Trade {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Raw free-form / voice-transcribed description.
+  rawText String
+
+  // --- Token identity ---
+  tokenSymbol String? // e.g. "WIF", "PNUT"
+  tokenName   String? // e.g. "dogwifhat"
+  mint        String? // Solana mint / contract address
+  chain       String? @default("solana") // solana | base | eth | bsc
+  platform    String? // pump.fun | raydium | letsbonk | moonshot | believe | ...
+  narrative   String? // meta: animal | ai-agent | political | celebrity | brainrot | ...
+
+  // --- Setup / behaviour ---
+  source    String? // discovery: ct | telegram | tiktok | scanner | kol | friend
+  tradeType String? // snipe | early | momentum | swing | ape | fomo-late
+
+  // --- Numbers (memecoins are tracked by market cap + SOL) ---
+  entryMcUsd Float? // market cap at entry, USD
+  exitMcUsd  Float? // market cap at exit, USD
+  sizeSol    Float? // position size in SOL
+  pnlSol     Float? // realized PnL in SOL (negative = loss)
+  multiplier Float? // e.g. 2.5 means 2.5x
+  holdTime   String? // human readable: "30s", "5m", "3h"
+
+  // --- Outcome + psychology ---
+  outcome    String? // moon | win | breakeven | loss | rug | holding
+  emotion    String? // fomo | greed | fear | revenge | euphoria | tilt | conviction
+  mistake    String? // paper-hands | held-rug | fomo-top | no-stop | oversized | aped-blind | revenge-trade | chased | no-tp | round-tripped
+  discipline Int? // 1..5 process quality (not P&L)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+enum PaymentStatus {
+  pending
+  confirmed
+  expired
+}
+
+// Crypto payment (Solana Pay) for a Pro subscription period.
+model Payment {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reference   String        @unique // Solana Pay reference pubkey (base58)
+  recipient   String // receiving wallet
+  amount      Float // amount due
+  currency    String // SOL | USDC
+  plan        Plan          @default(pro)
+  periodDays  Int           @default(30)
+  status      PaymentStatus @default(pending)
+  txSignature String? // on-chain signature once confirmed
+
+  createdAt   DateTime  @default(now())
+  confirmedAt DateTime?
+
+  @@index([userId, createdAt])
+}
